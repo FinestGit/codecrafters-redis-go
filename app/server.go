@@ -20,21 +20,27 @@ func main() {
 		os.Exit(1)
 	}
 
-	conn, err := l.Accept()
-
-	if err != nil {
-		fmt.Println("Error accepting connection: ", err.Error())
-		os.Exit(1)
-	}
-
-	tmp := make([]byte, 256)
 	for {
-		_, err := conn.Read(tmp)
+		conn, err := l.Accept()
+
+		if err != nil {
+			fmt.Println("Error accepting connection: ", err.Error())
+			os.Exit(1)
+		}
+
+		go handleConnection(conn)
+	}
+}
+
+func handleConnection(conn net.Conn) {
+	buf := make([]byte, 1024)
+	for {
+		_, err := conn.Read(buf)
 
 		if err != nil {
 			if err != io.EOF {
 				fmt.Println("Error reading from connection", err.Error())
-				os.Exit(1)
+				return
 			}
 			break
 		}
